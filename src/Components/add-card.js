@@ -132,25 +132,30 @@ export default function AddCard() {
             referrerPolicy: "no-referrer", // no-referrer, *client
             body: JSON.stringify(toInput) // body data type must match "Content-Type" header
         });
-        const data = await response.json();
 
-        if(!data.exception){
-        setMessage(response.ok ? "Card Added successfully" : "message");
-        setError(JSON.stringify(data))}
-        else{
-            data.errors.forEach(error => {
-                setError( error.message+ ",")
-            })
+        if(response.status!==201){
+            const data = await response.json();
+
+            if(!data.exception){
+                setMessage(response.ok ? "Card Added successfully" : "message");
+                setError(JSON.stringify(data))}
+            else{
+                data.errors.forEach(error => {
+                    setError( error.message+ ",")
+                })
+            }
         }
+
     }
 
     const handleSubmit = variables => {
         const addCardRequest = {name, number: cardNumber, limit: limit, brand: "VISA"};
         callAddCard(addCardRequest)
+        fetchCards();
         setName("");
         setCardNumber("");
         setLimit("");
-        viewSampleFunc();
+
     };
 
     if (firstLoad) {
@@ -160,14 +165,14 @@ export default function AddCard() {
 
     let isLoading = true;
 
-    async function viewSampleFunc() {
+    async function fetchCards() {
         let response = await fetch("/api/v1/cards");
         let body = await response.json();
         upDateData(body);
     }
 
     if (viewFirstLoad) {
-        viewSampleFunc();
+        fetchCards();
         setViewLoad(false);
     }
 
